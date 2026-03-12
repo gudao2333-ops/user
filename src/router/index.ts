@@ -113,6 +113,13 @@ const router = createRouter({
             meta: { requiresUserAuth: true }
         },
         {
+            path: '/me/site-owner',
+            name: 'personal-center-site-owner',
+            component: () => import('../views/PersonalCenter.vue'),
+            props: { section: 'siteOwner' },
+            meta: { requiresUserAuth: true }
+        },
+        {
             path: '/orders/:order_no',
             name: 'order-detail',
             component: () => import('../views/OrderDetail.vue'),
