@@ -168,6 +168,18 @@
                 </div>
               </div>
             </div>
+
+            <div class="rounded-2xl border theme-panel-soft p-6 shadow-sm">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 class="text-lg font-bold theme-text-primary">{{ t('personalCenter.siteOwner.quickEntryTitle') }}</h3>
+                  <p class="mt-1 text-sm theme-text-muted">{{ t('personalCenter.siteOwner.quickEntrySubtitle') }}</p>
+                </div>
+                <router-link to="/me/site-owner" class="inline-flex items-center rounded-xl theme-btn-primary px-4 py-2 text-sm font-bold">
+                  {{ t('personalCenter.siteOwner.quickEntryButton') }}
+                </router-link>
+              </div>
+            </div>
           </template>
 
           <ProfilePanel v-else-if="currentSection === 'profile'" />
@@ -177,6 +189,7 @@
           <AffiliatePanel v-else-if="currentSection === 'affiliate'" />
           <GiftCardPanel v-else-if="currentSection === 'giftCard'" />
           <ApiPanel v-else-if="currentSection === 'api'" />
+          <SiteOwnerPanel v-else-if="currentSection === 'siteOwner'" />
           <OrdersPanel v-else />
         </section>
       </div>
@@ -188,7 +201,7 @@
 import { computed, onMounted, ref, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { HomeIcon, ShoppingBagIcon, WalletIcon, GiftIcon, ShieldCheckIcon, UserCircleIcon, MegaphoneIcon, KeyIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon, ShoppingBagIcon, WalletIcon, GiftIcon, ShieldCheckIcon, UserCircleIcon, MegaphoneIcon, KeyIcon, BuildingStorefrontIcon } from '@heroicons/vue/24/outline'
 import { orderStatusClass, orderStatusLabel } from '../utils/status'
 import { pageAlertClass, type PageAlert } from '../utils/alerts'
 import { useUserProfileStore } from '../stores/userProfile'
@@ -199,8 +212,9 @@ import WalletPanel from './personal/WalletPanel.vue'
 import GiftCardPanel from './personal/GiftCardPanel.vue'
 import AffiliatePanel from './personal/AffiliatePanel.vue'
 import ApiPanel from './personal/ApiPanel.vue'
+import SiteOwnerPanel from './personal/SiteOwnerPanel.vue'
 
-type PersonalSection = 'overview' | 'profile' | 'security' | 'orders' | 'wallet' | 'giftCard' | 'affiliate' | 'api'
+type PersonalSection = 'overview' | 'profile' | 'security' | 'orders' | 'wallet' | 'giftCard' | 'affiliate' | 'api' | 'siteOwner'
 
 const props = withDefaults(defineProps<{ section?: PersonalSection }>(), {
   section: 'overview',
@@ -219,6 +233,7 @@ const sectionItems: Array<{ key: PersonalSection; label: string; icon: Component
   { key: 'security', label: 'personalCenter.tabs.security', icon: ShieldCheckIcon },
   { key: 'api', label: 'personalCenter.tabs.api', icon: KeyIcon },
   { key: 'profile', label: 'personalCenter.tabs.profile', icon: UserCircleIcon },
+  { key: 'siteOwner', label: 'personalCenter.tabs.siteOwner', icon: BuildingStorefrontIcon },
 ]
 
 const sectionRouteMap: Record<PersonalSection, string> = {
@@ -230,6 +245,7 @@ const sectionRouteMap: Record<PersonalSection, string> = {
   affiliate: '/me/affiliate',
   giftCard: '/me/gift-cards',
   api: '/me/api',
+  siteOwner: '/me/site-owner',
 }
 
 const currentSection = computed<PersonalSection>(() => props.section)

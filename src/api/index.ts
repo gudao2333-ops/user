@@ -443,6 +443,93 @@ export interface AffiliateWithdrawApplyPayload {
     account: string
 }
 
+export interface SiteOwnerProfileData {
+    id: number
+    user_id: number
+    site_name: string
+    domain: string
+    subdomain_prefix: string
+    domain_suffix: string
+    status: string
+    logo_url?: string
+    description?: string
+    created_at?: string
+    updated_at?: string
+}
+
+export interface SiteOwnerDashboardData {
+    has_site: boolean
+    opening_price?: string
+    opening_currency?: string
+    supported_domain_suffixes?: string[]
+    site?: SiteOwnerProfileData
+    stats?: {
+        product_count?: number
+        order_count?: number
+        profit_pending?: string
+        profit_available?: string
+        withdrawn_total?: string
+    }
+}
+
+export interface SiteOwnerOpenPayload {
+    site_name: string
+    subdomain_prefix: string
+    domain_suffix: string
+}
+
+export interface SiteOwnerBasicSettingsPayload {
+    site_name?: string
+    logo_url?: string
+    description?: string
+}
+
+export interface SiteOwnerProductPricingData {
+    product_id: number
+    product_name: string
+    product_slug?: string
+    base_price: string
+    site_price: string
+    currency: string
+}
+
+export interface SiteOwnerOrderSummaryData {
+    id: number
+    order_no: string
+    status: string
+    currency: string
+    paid_amount: string
+    site_profit: string
+    created_at?: string
+}
+
+export interface SiteOwnerProfitLedgerData {
+    id: number
+    currency: string
+    amount: string
+    type: string
+    status: string
+    order_no?: string
+    remark?: string
+    created_at?: string
+}
+
+export interface SiteOwnerWithdrawData {
+    id: number
+    amount: string
+    currency: string
+    channel: string
+    account: string
+    status: string
+    created_at?: string
+}
+
+export interface SiteOwnerWithdrawApplyPayload {
+    amount: string
+    channel: string
+    account: string
+}
+
 export interface CreatePaymentPayload {
     order_id: number
     channel_id?: number
@@ -576,4 +663,17 @@ export const affiliateAPI = {
     withdraws: (params?: any) => userApi.get<ApiResponse<AffiliateWithdrawData[]>>('/affiliate/withdraws', { params }),
     applyWithdraw: (data: AffiliateWithdrawApplyPayload) =>
         userApi.post<ApiResponse<AffiliateWithdrawData>>('/affiliate/withdraws', data),
+}
+
+export const siteOwnerAPI = {
+    dashboard: () => userApi.get<ApiResponse<SiteOwnerDashboardData>>('/site-owner/dashboard'),
+    open: (data: SiteOwnerOpenPayload) => userApi.post<ApiResponse>('/site-owner/open', data),
+    updateBasicSettings: (data: SiteOwnerBasicSettingsPayload) => userApi.put<ApiResponse>('/site-owner/settings', data),
+    productPricingList: (params?: any) => userApi.get<ApiResponse<SiteOwnerProductPricingData[]>>('/site-owner/products/pricing', { params }),
+    batchUpdateProductPricing: (data: { items: Array<{ product_id: number; site_price: string }> }) =>
+        userApi.put<ApiResponse>('/site-owner/products/pricing', data),
+    orderSummaries: (params?: any) => userApi.get<ApiResponse<SiteOwnerOrderSummaryData[]>>('/site-owner/orders', { params }),
+    profitLedger: (params?: any) => userApi.get<ApiResponse<SiteOwnerProfitLedgerData[]>>('/site-owner/profit-ledger', { params }),
+    applyWithdraw: (data: SiteOwnerWithdrawApplyPayload) => userApi.post<ApiResponse<SiteOwnerWithdrawData>>('/site-owner/withdraws', data),
+    withdrawRecords: (params?: any) => userApi.get<ApiResponse<SiteOwnerWithdrawData[]>>('/site-owner/withdraws', { params }),
 }
