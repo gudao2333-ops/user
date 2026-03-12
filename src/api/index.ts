@@ -387,6 +387,11 @@ export interface GiftCardRedeemResult {
     wallet?: WalletAccountData
     transaction?: WalletTransactionData
     wallet_delta?: string
+    redeem_mode?: string
+    order_id?: number
+    order_no?: string
+    order_status?: string
+    redirect_url?: string
 }
 
 export interface AffiliateDashboardData {
