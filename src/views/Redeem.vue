@@ -13,6 +13,7 @@
           {{ t('personalCenter.giftCard.loginNow') }}
         </router-link>
       </div>
+    <div class="container mx-auto px-4 max-w-4xl">
       <GiftCardPanel />
     </div>
   </div>
