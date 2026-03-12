@@ -60,6 +60,15 @@
                     </button>
                   </div>
                 </div>
+                <div v-if="orderDetailPath" class="pt-1">
+                  <button
+                    type="button"
+                    class="inline-flex h-8 items-center justify-center rounded-lg border border-emerald-300/70 px-3 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                    @click="openOrderDetail"
+                  >
+                    {{ t('personalCenter.giftCard.viewOrderAction') }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -122,17 +131,20 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { giftCardAPI, type CaptchaPayload, type GiftCardRedeemResult } from '../../api'
 import { useAppStore } from '../../stores/app'
+import { useUserAuthStore } from '../../stores/userAuth'
 import { pageAlertClass, type PageAlert } from '../../utils/alerts'
 import ImageCaptcha from '../../components/captcha/ImageCaptcha.vue'
 import TurnstileCaptcha from '../../components/captcha/TurnstileCaptcha.vue'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const appStore = useAppStore()
+const userAuthStore = useUserAuthStore()
 
 const redeemForm = reactive({
   code: '',
@@ -244,6 +256,15 @@ const ensureCaptchaPassed = () => {
 
 const submitRedeem = async () => {
   panelAlert.value = null
+  if (!userAuthStore.isAuthenticated) {
+    panelAlert.value = {
+      level: 'warning',
+      message: t('personalCenter.giftCard.loginRequiredMessage'),
+    }
+    const redirect = encodeURIComponent(route.fullPath || '/redeem')
+    void router.push(`/auth/login?redirect=${redirect}`)
+    return
+  }
   const code = String(redeemForm.code || '').trim().toUpperCase()
   if (!code) {
     panelAlert.value = {
