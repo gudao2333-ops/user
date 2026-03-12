@@ -31,7 +31,7 @@
               </div>
               <div class="flex-1 space-y-2">
                 <h3 class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ t('personalCenter.giftCard.successTitle') }}</h3>
-                <div class="grid grid-cols-1 gap-2 text-xs text-emerald-700/90 dark:text-emerald-200 md:grid-cols-3">
+                <div class="grid grid-cols-1 gap-2 text-xs text-emerald-700/90 dark:text-emerald-200 md:grid-cols-2 xl:grid-cols-4">
                   <div>
                     <div class="opacity-75">{{ t('personalCenter.giftCard.successCode') }}</div>
                     <div class="mt-0.5 font-mono">{{ String(lastRedeem.gift_card?.code || '-').toUpperCase() }}</div>
@@ -44,6 +44,30 @@
                     <div class="opacity-75">{{ t('personalCenter.giftCard.successBalance') }}</div>
                     <div class="mt-0.5 font-semibold">{{ currentBalanceText }}</div>
                   </div>
+                  <div>
+                    <div class="opacity-75">{{ t('personalCenter.giftCard.successMode') }}</div>
+                    <div class="mt-0.5 font-semibold">{{ redeemedModeText }}</div>
+                  </div>
+                  <div>
+                    <div class="opacity-75">{{ t('personalCenter.giftCard.successOrderNo') }}</div>
+                    <button
+                      type="button"
+                      :disabled="!orderDetailPath"
+                      class="mt-0.5 font-mono underline decoration-dotted underline-offset-2 enabled:hover:text-emerald-500 disabled:no-underline disabled:opacity-70"
+                      @click="openOrderDetail"
+                    >
+                      {{ orderNoText }}
+                    </button>
+                  </div>
+                </div>
+                <div v-if="orderDetailPath" class="pt-1">
+                  <button
+                    type="button"
+                    class="inline-flex h-8 items-center justify-center rounded-lg border border-emerald-300/70 px-3 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/40 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                    @click="openOrderDetail"
+                  >
+                    {{ t('personalCenter.giftCard.viewOrderAction') }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -107,15 +131,20 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { giftCardAPI, type CaptchaPayload, type GiftCardRedeemResult } from '../../api'
 import { useAppStore } from '../../stores/app'
+import { useUserAuthStore } from '../../stores/userAuth'
 import { pageAlertClass, type PageAlert } from '../../utils/alerts'
 import ImageCaptcha from '../../components/captcha/ImageCaptcha.vue'
 import TurnstileCaptcha from '../../components/captcha/TurnstileCaptcha.vue'
 
 const { t } = useI18n()
+const router = useRouter()
+const route = useRoute()
 const appStore = useAppStore()
+const userAuthStore = useUserAuthStore()
 
 const redeemForm = reactive({
   code: '',
@@ -142,6 +171,34 @@ const redeemedAmountText = computed(() => {
   if (!rawAmount) return '-'
   return `${rawAmount} ${currency}`
 })
+
+const redeemedModeText = computed(() => {
+  const mode = String(lastRedeem.value?.redeem_mode || '').trim()
+  if (mode === 'product') return t('personalCenter.giftCard.redeemModeProduct')
+  if (mode === 'wallet') return t('personalCenter.giftCard.redeemModeWallet')
+  return '-'
+})
+
+const orderNoText = computed(() => {
+  const orderNo = String(lastRedeem.value?.order_no || '').trim()
+  return orderNo || '-'
+})
+
+const orderDetailPath = computed(() => {
+  const orderNo = String(lastRedeem.value?.order_no || '').trim()
+  if (orderNo) return `/orders/${encodeURIComponent(orderNo)}`
+  const redirectURL = String(lastRedeem.value?.redirect_url || '').trim()
+  return redirectURL || ''
+})
+
+const openOrderDetail = () => {
+  if (!orderDetailPath.value) return
+  if (orderDetailPath.value.startsWith('/')) {
+    void router.push(orderDetailPath.value)
+    return
+  }
+  window.open(orderDetailPath.value, '_blank', 'noopener')
+}
 
 const currentBalanceText = computed(() => {
   const balance = String(lastRedeem.value?.wallet?.balance || '').trim()
@@ -199,6 +256,15 @@ const ensureCaptchaPassed = () => {
 
 const submitRedeem = async () => {
   panelAlert.value = null
+  if (!userAuthStore.isAuthenticated) {
+    panelAlert.value = {
+      level: 'warning',
+      message: t('personalCenter.giftCard.loginRequiredMessage'),
+    }
+    const redirect = encodeURIComponent(route.fullPath || '/redeem')
+    void router.push(`/auth/login?redirect=${redirect}`)
+    return
+  }
   const code = String(redeemForm.code || '').trim().toUpperCase()
   if (!code) {
     panelAlert.value = {
@@ -233,9 +299,16 @@ const submitRedeem = async () => {
     redeemForm.code = ''
     resetCaptcha()
   } catch (err: any) {
+    const errorMessage = String(err?.message || '').toLowerCase()
+    let message = err?.message || t('personalCenter.giftCard.errors.redeemFailed')
+    if (errorMessage.includes('target-invalid') || errorMessage.includes('target invalid')) {
+      message = t('personalCenter.giftCard.errors.targetInvalid')
+    } else if (errorMessage.includes('stock-insufficient') || errorMessage.includes('stock insufficient')) {
+      message = t('personalCenter.giftCard.errors.stockInsufficient')
+    }
     panelAlert.value = {
       level: 'error',
-      message: err?.message || t('personalCenter.giftCard.errors.redeemFailed'),
+      message,
     }
     if (captchaProvider.value === 'image') {
       imageCaptchaRef.value?.refresh()
