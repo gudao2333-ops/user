@@ -147,8 +147,7 @@ const router = createRouter({
             path: '/redeem',
             name: 'redeem',
             component: () => import('../views/Redeem.vue'),
-            alias: ['/redeen'],
-            meta: { requiresUserAuth: true }
+            alias: ['/redeen']
         },
         {
             path: '/terms',

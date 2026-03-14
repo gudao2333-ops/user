@@ -5,9 +5,11 @@ import { useI18n } from 'vue-i18n'
 import { redeemCodeAPI, type RedeemCodePreviewData, type RedeemCodeRedeemResult } from '../api'
 import { orderStatusLabel } from '../utils/status'
 import { fulfillmentStatusLabel } from '../utils/fulfillment'
+import { useUserAuthStore } from '../stores/userAuth'
 
 const route = useRoute()
 const router = useRouter()
+const userAuthStore = useUserAuthStore()
 const { t } = useI18n()
 const codeInput = ref('')
 const loadingPreview = ref(false)
@@ -16,6 +18,10 @@ const previewError = ref('')
 const redeemError = ref('')
 const preview = ref<RedeemCodePreviewData | null>(null)
 const redeemResult = ref<RedeemCodeRedeemResult | null>(null)
+const isAuthenticated = computed(() => userAuthStore.isAuthenticated)
+
+const loginUrl = computed(() => `/auth/login?redirect=${encodeURIComponent(route.fullPath)}`)
+const registerUrl = computed(() => `/auth/register?redirect=${encodeURIComponent(route.fullPath)}`)
 
 const getLocalizedText = (jsonData: any) => {
   if (!jsonData || typeof jsonData !== 'object') return ''
@@ -110,6 +116,10 @@ const previewRedeem = async () => {
   redeemError.value = ''
   redeemResult.value = null
   preview.value = null
+  if (!isAuthenticated.value) {
+    previewError.value = '请先登录后再兑换商品，没有账号可先注册。'
+    return
+  }
   const code = codeInput.value.trim()
   if (!code) {
     previewError.value = '请输入兑换码'
@@ -136,6 +146,10 @@ const previewRedeem = async () => {
 
 const redeem = async () => {
   redeemError.value = ''
+  if (!isAuthenticated.value) {
+    redeemError.value = '请先登录后再兑换商品，没有账号可先注册。'
+    return
+  }
   const code = codeInput.value.trim()
   if (!code) {
     redeemError.value = '请输入兑换码'
@@ -176,7 +190,7 @@ const goOrder = () => {
 
 onMounted(() => {
   resolveCodeFromQuery()
-  if (codeInput.value) {
+  if (codeInput.value && isAuthenticated.value) {
     previewRedeem()
   }
 })
@@ -189,13 +203,30 @@ watch(() => route.query.code, () => {
 <template>
   <main class="min-h-screen pt-24 pb-10">
     <div class="container mx-auto px-4 max-w-3xl space-y-6">
+      <section v-if="!isAuthenticated" class="theme-panel-strong rounded-2xl border theme-border p-6 space-y-4">
+        <div class="space-y-2 text-center sm:text-left">
+          <p class="text-xs font-semibold uppercase tracking-[0.2em] theme-text-accent">Redeem Access</p>
+          <h2 class="text-2xl font-bold theme-text-primary">登录后即可兑换商品</h2>
+          <p class="text-sm theme-text-muted">为保障订单和发货信息安全，请先登录账号后再兑换。</p>
+          <p class="text-sm theme-text-muted">没有账号也没关系，先注册，完成后会自动回到本页继续兑换。</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3 sm:justify-start">
+          <router-link :to="loginUrl" class="inline-flex items-center justify-center px-4 py-2 rounded-lg theme-btn-primary">
+            立即登录
+          </router-link>
+          <router-link :to="registerUrl" class="inline-flex items-center justify-center px-4 py-2 rounded-lg theme-btn-neutral border theme-border">
+            免费注册
+          </router-link>
+        </div>
+      </section>
+
       <section class="theme-panel-strong rounded-2xl border theme-border p-6 space-y-4">
         <h1 class="text-2xl font-bold theme-text-primary">兑换商品</h1>
-        <p class="text-sm theme-text-muted">输入兑换码并预览商品信息，确认后将自动创建订单并展示发货结果。</p>
+        <p class="text-sm theme-text-muted">{{ isAuthenticated ? '输入兑换码并预览商品信息，确认后将自动创建订单并展示发货结果。' : '登录后可预览兑换信息并完成兑换。' }}</p>
 
         <div class="flex flex-col sm:flex-row gap-3">
-          <input v-model="codeInput" placeholder="请输入兑换码" class="flex-1 rounded-lg border theme-border bg-transparent px-3 py-2 text-sm" />
-          <button :disabled="loadingPreview" class="px-4 py-2 rounded-lg theme-btn-primary disabled:opacity-60" @click="previewRedeem">{{ loadingPreview ? '预览中...' : '预览兑换信息' }}</button>
+          <input v-model="codeInput" :disabled="!isAuthenticated" placeholder="请输入兑换码" class="flex-1 rounded-lg border theme-border bg-transparent px-3 py-2 text-sm disabled:opacity-60" />
+          <button :disabled="loadingPreview || !isAuthenticated" class="px-4 py-2 rounded-lg theme-btn-primary disabled:opacity-60" @click="previewRedeem">{{ loadingPreview ? '预览中...' : '预览兑换信息' }}</button>
         </div>
 
         <p v-if="previewError" class="text-sm text-destructive">{{ previewError }}</p>
