@@ -61,7 +61,6 @@
         <OrdersPanel v-else-if="currentSection === 'orders'" />
         <WalletPanel v-else-if="currentSection === 'wallet'" />
         <AffiliatePanel v-else-if="currentSection === 'affiliate'" />
-        <GiftCardPanel v-else-if="currentSection === 'giftCard'" />
         <ApiPanel v-else-if="currentSection === 'api'" />
         <OrdersPanel v-else />
       </section>
@@ -80,7 +79,6 @@ import ProfilePanel from './personal/ProfilePanel.vue'
 import SecurityPanel from './personal/SecurityPanel.vue'
 import OrdersPanel from './personal/OrdersPanel.vue'
 import WalletPanel from './personal/WalletPanel.vue'
-import GiftCardPanel from './personal/GiftCardPanel.vue'
 import AffiliatePanel from './personal/AffiliatePanel.vue'
 import ApiPanel from './personal/ApiPanel.vue'
 
@@ -112,7 +110,7 @@ const sectionRouteMap: Record<PersonalSection, string> = {
   orders: '/me/orders',
   wallet: '/me/wallet',
   affiliate: '/me/affiliate',
-  giftCard: '/me/gift-cards',
+  giftCard: '/redeem',
   api: '/me/api',
 }
 

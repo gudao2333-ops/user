@@ -89,8 +89,7 @@ const router = createRouter({
         {
             path: '/me/gift-cards',
             name: 'personal-center-gift-cards',
-            component: () => import('../views/PersonalCenter.vue'),
-            props: { section: 'giftCard' },
+            redirect: '/redeem',
             meta: { requiresUserAuth: true }
         },
         {

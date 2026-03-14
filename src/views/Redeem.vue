@@ -117,7 +117,7 @@ const previewRedeem = async () => {
   redeemResult.value = null
   preview.value = null
   if (!isAuthenticated.value) {
-    previewError.value = '请先登录后再兑换商品，没有账号可先注册。'
+    previewError.value = '请先登录后再兑换礼品卡，没有账号可先注册。'
     return
   }
   const code = codeInput.value.trim()
@@ -147,7 +147,7 @@ const previewRedeem = async () => {
 const redeem = async () => {
   redeemError.value = ''
   if (!isAuthenticated.value) {
-    redeemError.value = '请先登录后再兑换商品，没有账号可先注册。'
+    redeemError.value = '请先登录后再兑换礼品卡，没有账号可先注册。'
     return
   }
   const code = codeInput.value.trim()
@@ -206,9 +206,9 @@ watch(() => route.query.code, () => {
       <section v-if="!isAuthenticated" class="theme-panel-strong rounded-2xl border theme-border p-6 space-y-4">
         <div class="space-y-2 text-center sm:text-left">
           <p class="text-xs font-semibold uppercase tracking-[0.2em] theme-text-accent">Redeem Access</p>
-          <h2 class="text-2xl font-bold theme-text-primary">登录后即可兑换商品</h2>
+          <h2 class="text-2xl font-bold theme-text-primary">登录后即可兑换礼品卡</h2>
           <p class="text-sm theme-text-muted">为保障订单和发货信息安全，请先登录账号后再兑换。</p>
-          <p class="text-sm theme-text-muted">没有账号也没关系，先注册，完成后会自动回到本页继续兑换。</p>
+              <p class="text-sm theme-text-muted">没有账号也没关系，先注册，完成后会自动回到本页继续兑换。</p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 sm:justify-start">
           <router-link :to="loginUrl" class="inline-flex items-center justify-center px-4 py-2 rounded-lg theme-btn-primary">
@@ -221,7 +221,7 @@ watch(() => route.query.code, () => {
       </section>
 
       <section class="theme-panel-strong rounded-2xl border theme-border p-6 space-y-4">
-        <h1 class="text-2xl font-bold theme-text-primary">兑换商品</h1>
+        <h1 class="text-2xl font-bold theme-text-primary">兑换礼品卡</h1>
         <p class="text-sm theme-text-muted">{{ isAuthenticated ? '输入兑换码并预览商品信息，确认后将自动创建订单并展示发货结果。' : '登录后可预览兑换信息并完成兑换。' }}</p>
 
         <div class="flex flex-col sm:flex-row gap-3">
