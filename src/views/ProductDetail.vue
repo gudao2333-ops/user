@@ -370,7 +370,6 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useAppStore } from '../stores/app'
 import { productAPI } from '../api'
 import { getImageUrl } from '../utils/image'
 import { processHtmlForDisplay } from '../utils/content'
@@ -379,14 +378,13 @@ import { useUserAuthStore } from '../stores/userAuth'
 import { debounceAsync } from '../utils/debounce'
 import { useHead } from '@unhead/vue'
 // centsToAmount used internally by composable
-import { buildSkuDisplayText, normalizeSkuId } from '../utils/sku'
+import { normalizeSkuId } from '../utils/sku'
 import { useLocalized, useProductLabels } from '../composables/useProduct'
 import { toast } from '../composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const appStore = useAppStore()
 const cartStore = useCartStore()
 const userAuthStore = useUserAuthStore()
 
@@ -555,12 +553,26 @@ const images = computed(() => {
 })
 
 const skuDisplayText = (sku: any) => {
-  return buildSkuDisplayText({
-    skuCode: sku?.sku_code,
-    specValues: sku?.spec_values,
-    fallback: t('productDetail.skuFallback'),
-    locale: appStore.locale,
-  })
+  const specValues = sku?.spec_values
+  if (specValues && typeof specValues === 'object') {
+    const nameValue = (specValues as any)?.name
+    if (nameValue && typeof nameValue === 'object') {
+      const localizedName = getLocalizedText(nameValue)
+      if (localizedName) return localizedName
+    }
+    if (typeof nameValue === 'string' && nameValue.trim()) return nameValue.trim()
+    const firstValue = Object.values(specValues).find((val: any) => {
+      if (typeof val === 'string' && val.trim()) return true
+      if (val && typeof val === 'object') return Boolean(getLocalizedText(val))
+      return false
+    })
+    if (typeof firstValue === 'string' && firstValue.trim()) return firstValue.trim()
+    if (firstValue && typeof firstValue === 'object') {
+      const localizedValue = getLocalizedText(firstValue)
+      if (localizedValue) return localizedValue
+    }
+  }
+  return String(sku?.sku_code || t('productDetail.skuFallback'))
 }
 
 const syncSelectedSku = () => {

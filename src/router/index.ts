@@ -1,7 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+﻿import { createRouter, createWebHistory } from 'vue-router'
 import { useUserAuthStore } from '../stores/userAuth'
 import { useAppStore } from '../stores/app'
 import { captureAffiliateFromRoute } from '../utils/affiliate'
+import { toast } from '../composables/useToast'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,12 +45,6 @@ const router = createRouter({
             path: '/checkout',
             name: 'checkout',
             component: () => import('../views/Checkout.vue'),
-        },
-
-        {
-            path: '/redeem',
-            name: 'redeem',
-            component: () => import('../views/Redeem.vue'),
         },
         {
             path: '/pay',
@@ -113,13 +108,6 @@ const router = createRouter({
             meta: { requiresUserAuth: true }
         },
         {
-            path: '/me/site-owner',
-            name: 'personal-center-site-owner',
-            component: () => import('../views/PersonalCenter.vue'),
-            props: { section: 'siteOwner' },
-            meta: { requiresUserAuth: true }
-        },
-        {
             path: '/orders/:order_no',
             name: 'order-detail',
             component: () => import('../views/OrderDetail.vue'),
@@ -154,6 +142,13 @@ const router = createRouter({
             path: '/about',
             name: 'about',
             component: () => import('../views/About.vue'),
+        },
+        {
+            path: '/redeem',
+            name: 'redeem',
+            component: () => import('../views/Redeem.vue'),
+            alias: ['/redeen'],
+            meta: { requiresUserAuth: true }
         },
         {
             path: '/terms',
@@ -200,6 +195,9 @@ router.beforeEach(async (to, _from, next) => {
 
     if (to.meta.requiresUserAuth) {
         if (!userAuthStore.isAuthenticated) {
+            if (to.name === 'redeem' || to.path === '/redeem' || to.path === '/redeen') {
+                toast.info('请先登录后再进行兑换')
+            }
             const redirect = encodeURIComponent(to.fullPath)
             next(`/auth/login?redirect=${redirect}`)
         } else {
@@ -225,3 +223,4 @@ router.afterEach(() => {
 })
 
 export default router
+

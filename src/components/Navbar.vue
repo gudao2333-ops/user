@@ -200,14 +200,14 @@ const menuItems = [
   { path: '/products', label: 'nav.products' },
   { path: '/blog', label: 'nav.blog' },
   { path: '/notice', label: 'nav.notice' },
-  { path: '/about', label: 'nav.about' },
+  { path: '/redeem', label: 'nav.redeem' },
 ]
 
 // Mobile drawer only shows items NOT in the bottom nav (Home, Products, Cart, Me are in bottom nav)
 const mobileDrawerItems = [
   { path: '/blog', label: 'nav.blog' },
   { path: '/notice', label: 'nav.notice' },
-  { path: '/about', label: 'nav.about' },
+  { path: '/redeem', label: 'nav.redeem' },
 ]
 
 const languages = [

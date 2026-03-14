@@ -85,12 +85,6 @@
               >
                 {{ t('home.featured.viewAll') }}
               </router-link>
-              <router-link
-                to="/redeem"
-                class="inline-flex items-center rounded-lg border border-emerald-300/60 bg-emerald-500/20 px-5 py-3 text-sm font-medium text-white transition hover:border-emerald-200 hover:bg-emerald-500/30 min-h-[44px]"
-              >
-                {{ t('personalCenter.tabs.giftCard') }}
-              </router-link>
             </div>
 
             <div v-if="bannerCount > 1" class="mt-5 flex items-center gap-2">
